@@ -1,0 +1,154 @@
+---
+title: 'How to Download xlsx Files from a Next.js Route Handler'
+description: 'Make table exports in MS Excel and CSV formats available on demand.'
+date: '2024-02-18'
+modified: '2024-03-01'
+tags: ['nextjs','react','excel','xlsx']
+cover_image: true
+---
+
+**TLDR:** You can set up a Next.js Route Handler that creates and downloads Microsoft Excel (xlsx) files. 
+
+## XLSX Files
+
+No matter where you work as a developer, there's a good chance someone will ask you to send them an MS Excel spreadsheet sooner or later. Those files end with the extension xlsx or xls. 
+
+At my job, I manage a large data project and regularly receive requests for table exports as spreadsheets. 
+
+I decided to set up an API endpoint via Next.js route handler which will allow my boss and co-workers to create and download their own table exports on demand. 
+
+## xlsx dependency
+
+The [xlsx](https://docs.sheetjs.com/docs/getting-started/installation/frameworks) package is also known as SheetJS. 
+
+Install xlsx:
+
+```bash
+npm i --save https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz
+```
+**Note:** Do NOT get the xlsx package from the npm registry with `npm install xlsx`. Sheetjs has stopped using the public registry at version 18.5. You will see the version in the public registry is 2+ years old and has a high severity vulnerability now. You can confirm this vulnerability on the [Socket.dev xlsx page](https://socket.dev/npm/package/xlsx).
+
+## Add xlsx to Your Project
+
+Next, import xlsx into your project:
+
+```ts 
+import * as XLSX from 'xlsx'
+```
+My Next.js route handler starts by receiving a parameter with the requested table name. I'm also including some pseudo-code comments to allow you to follow the logic process until I get to the xlsx details.
+
+```ts 
+/* example path: /api/tables/[table] */
+
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { table: string } }
+) {
+    // check for authorized user first! 
+    try {
+        const { table } = params
+        if (!table) throw new Error('Table name required')
+
+        // check table name with list of table names here
+
+        // if table doesn't exist, throw an error 
+
+        // Query: SELECT * FROM table and get a JSON response 
+
+    } catch (e) {
+        if (e instanceof Error) {
+            return new Response(e.message, {
+                status: 400,
+            })
+        }
+    }
+    
+
+}
+```
+
+## Creating the XLSX File 
+
+Here's the good stuff using the xlsx package:
+ 
+```ts 
+// ...previous code 
+
+// Query: SELECT * FROM your table and get a JSON response
+
+// Create a new XLSX workbook:
+const workbook = XLSX.utils.book_new()
+
+// Create a new worksheet: 
+const worksheet = XLSX.utils.json_to_sheet(jsonTableData)
+
+// Append the worksheet to the workbook: 
+XLSX.utils.book_append_sheet(workbook, worksheet, "MySheet")
+
+// Create data buffer 
+const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" })
+
+// Create and send a new Response
+return new Response(buffer, {
+    status: 200,
+    headers: {
+        'Content-Disposition': `attachment; filename="${table}.xlsx"`,
+        'Content-Type': 'application/vnd.ms-excel',
+    }
+})
+
+// } catch (e) { and rest of code...
+```
+You can find a similar example for a Node.js & Express server in the [SheetJS docs](https://docs.sheetjs.com/docs/solutions/output#example-server-responses). 
+
+The key to success here is creating the buffer with the `XLSX.write` method, and then sending it in the Response with the proper headers. 
+
+## Other File Types
+
+Do you want to download CSV (comma-separated) or TSV (tab-separated) files? 
+
+Or maybe just display an HTML version? 
+
+No problem! 
+
+You can find all of the appropriate XLSX methods in the [SheetJS docs](https://docs.sheetjs.com/), but here is how I provide CSV downloads, too. 
+
+I'm looking for a `format` parameter. If it equals `csv`, then I'm sending that file type instead. 
+
+```ts
+/* example path: /api/tables/[table]?format=csv */
+
+// begin route handler code above 
+
+// put this somewhere before the XLSX creation and response 
+const searchParams = request.nextUrl.searchParams
+const format = searchParams.get('format')
+
+if (format === 'csv') {
+
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+        forceQuotes: true,
+    })
+
+    return new Response(csv, {
+        status: 200,
+        headers: {
+            'Content-Disposition': `attachment; filename="${tableName}.csv"`,
+            'Content-Type': 'text/csv',
+        }
+    })
+}
+```
+## Final Notes:
+
+- Always check for an authorized user. 
+
+- Don't allow SQL injections. I'm verifying the `table` parameter with a list of accurate table names. Only those specific values are allowed. 
+
+Enjoy creating downloads!
+
+## Watch My Next.js Reports tutorial with Microsoft Excel Video:
+
+<Video id="Zz_mP5gAnxc" />
+
+

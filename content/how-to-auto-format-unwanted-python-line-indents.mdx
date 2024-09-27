@@ -1,0 +1,152 @@
+---
+title: 'How to Auto-Format Unwanted Python Line Indentations in VS Code'
+description: 'VS Code can remove unwanted line indentations in a Python file.'
+date: '2024-01-05'
+modified: '2024-02-10'
+tags: ['python','vscode']
+cover_image: false
+---
+
+_VS Code can remove unwanted line indentations in a Python file.. or can it?_
+
+**TLDR:** VS Code no longer supports the desired formatting behavior, but if you want, you can still install a version that supports it.
+
+**Update:** You can install autopep8 in your virtual environment and run `autopep8 -i -a -a your-file-name.py` to get the desired formatting. Unfortunately, it won't apply in VS Code settings. You must run this in a terminal window. _Thanks to Michael J. Sheets for the email!_ 
+
+## The Beginning 
+
+I published a 9 Hour [Python Course for Beginners](https://youtu.be/H2EJuAcrZYU) in 2023. 
+
+In the second chapter of the course, I show how VS Code can auto-format your Python code when you save your file. 
+
+I did it again to create the screen recording below:
+
+<CustomImage src="https://raw.githubusercontent.com/gitdagray/my-blogposts/main/images/python-auto-format-indents.gif" alt="VS Code Python auto-formatting unwanted indentations" width={600} height={375} />
+
+You can see that I tab twice and then choose "Format Document With" from the context menu. I then choose "Python" and the file auto-formats. 
+
+Then I tab twice again and save the file with `Ctrl+S`. The file once again formats because I have `Format On Save` selected in my settings.
+
+## The Problem
+
+Shortly after publishing my course, **VS Code changed how it handles auto-formatting.** 
+
+This has led to some confusion and frustration.
+
+I get it. 
+
+_I am also frustrated when things change right after I publish a video._ 
+
+In tech things change all the time - and that includes web development and programming tools. 
+
+My best advice for beginners is to get used to change. Change will keep happening throughout your career in tech. 
+
+That said, you can tackle a problem like this and find a solution. 
+
+I did, and I'm going to share it below. 
+
+First, let's address some fixes that won't work and a discussion that is not exactly accurate.
+
+## Fixes That Won't Work  
+
+After receiving many video comments about the Python formatting example I provided, I opened a Python file in VS Code and tried it again. 
+
+**It didn't work.** 
+
+It clearly _used to work_ as I demonstrated in the video, but something had indeed changed. 
+
+At this point, I knew it was likely due to a VS Code update. 
+
+I searched the web for an answer. I found all sorts of random advice given with the best of intentions. 
+
+Some shared their VS Code `settings.json` preferences for Python because theirs worked. 
+
+Some blamed using a virtual environment. 
+
+Others claimed `autopep8` was deprecated, and everyone should use `black` instead. (As of January 2024, [autopep8](https://marketplace.visualstudio.com/items?itemName=ms-python.autopep8) is available for use and is not deprecated.)
+
+I believe anyone sharing the above solutions were just a VS Code update away from theirs not working as well. 
+
+## A Not Exactly Accurate Discussion  
+
+I read the autopep8 logs of my current VS Code installation. There I noticed a warning stating `Skipping non python code`. 
+
+I Googled this phrase along with `VS Code` and found a [GitHub discussion](https://github.com/microsoft/vscode-python/discussions/21201) with a VS Code maintainer. 
+
+I know he was trying to help, but he suggested what I demonstrated in the video above was NOT possible with VS Code as I had it setup: 
+
+> That's probably not being done by a formatter we support since that isn't valid Python code (you can't have an indent like that as it's not valid Python code). They may have some other extension installed, pressed something else to fix the indentation (e.g. ctrl+shift+tab to dedent the line), etc.
+
+> Regardless, there is zero expectation from us that any formatter we support would be able to handle fixing that code.
+
+Again, I know he meant well, and I respect the VS Code (and all) maintainers. Nothing personal here, friend. Your work is vital. 
+
+Unfortunately, _all of the assumptions above were incorrect_. 
+- I did not use another formatter. 
+- I did not have another extension installed. 
+- I did not press a key combination to dedent the line 
+
+I'm sure the maintainer would have directly addressed the issue if he was provided with steps to recreate the conditions for himself. 
+
+_That's exactly what I'm going to do._
+
+## How to Remove Unwanted Line Indentations with VS Code Auto-Formatting
+
+I had updated VS Code on my main workstation. The auto-formatting I demonstrated in the video was no longer working on it.
+
+_Fortunately, my old Windows laptop had not been updated_. 
+
+I checked my installed versions of VS Code and the Python extension for VS Code: 
+
+`VS Code v1.70.2`
+
+`Python Extension v2022.16.1`
+
+I created a new Python file in VS Code and quickly recreated the auto-formatting scenario. 
+
+**It worked!**
+
+<CustomImage src="https://raw.githubusercontent.com/gitdagray/my-blogposts/main/images/python-auto-format-indents.gif" alt="VS Code Python auto-formatting unwanted indentations" width={600} height={375} />
+
+This told me my hunch was correct. The desired formatting behavior had been removed in a VS Code update.
+
+I wanted to confirm I could recreate this desired formatting behavior on another computer, too. 
+
+I got out my new Macbook. It has the latest version of Python installed. (_3.12.1 as of this writing_) 
+
+I downloaded [`VS Code v1.70.2`](https://code.visualstudio.com/updates/v1_70) and installed it.
+
+That's not enough though. I needed the VS Code Python extension to identify improper formatting. 
+
+I couldn't find a `VSIX` file for version `2022.16.1` of the extension, so I went with the closest version I could find to download: [`v2022.15.12731017`](https://www.vsixhub.com/go.php?post_id=101360&app_id=f1f59ae4-9318-4f3c-a9b5-81b2eaa5f8a5&s=4WVwftKw6Tl%2FA&link=https%3A%2F%2Ff2.vsixhub.com%2Ffile.php%3Fversion%3D2022.15.12731017%26ext_name%3Dpython)
+
+To install a VS Code extension from a VSIX file, open the Command Palette (`Ctrl+Shift+P`) and use the `Install from VSIX...` command. 
+
+With these older versions now installed on my new Macbook, I once again recreated the auto-formatting scenario. 
+
+**It worked, too!**
+
+<CustomImage src="https://raw.githubusercontent.com/gitdagray/my-blogposts/main/images/python-auto-format-indents.gif" alt="VS Code Python auto-formatting unwanted indentations" width={600} height={375} />
+
+Note the following:
+- I do not have any other formatting extensions. 
+- I do not have anything about Python in my `settings.json` file.
+- If I `Ctrl+Click` for the context menu and choose `Format Document With`, `Python` is the only formatting option listed.
+
+## Is It Worth It?
+
+_Probably not_. 
+
+I wouldn't go back to an old version of VS Code just for this feature. This would also cause you to miss any new updates. 
+
+Recent editions of VS Code give you red squiggly lines to identify this formatting mistake. You should be able to easily see them and correct them on your own. 
+
+Note: I said _formatting mistake_. 
+
+If you read the full [GitHub discussion](https://github.com/microsoft/vscode-python/discussions/21201) I mentioned earlier, the maintainer says the line in question isn't being formatted because it isn't valid Python code.
+
+Instead of considering this to be a formatting issue, it seems VS Code is now handling this as invalid code - _an error_. Their opinion is this is something you should identify and fix yourself instead of relying on a formatter.
+
+That said, we all now know **VS Code was once capable of auto-correcting unwanted line-indentations**. 
+
+It sure would be cool if a current version of VS Code did this again.
