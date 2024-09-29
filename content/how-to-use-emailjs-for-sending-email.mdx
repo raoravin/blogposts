@@ -1,0 +1,259 @@
+---
+title: 'Using EmailJS for Email Sending'
+description: 'Using EmailJS for Email Sending for contact page handle the submission via email using a service like EmailJS'
+date: '2024-09-29'
+modified: '2024-09-29'
+tags: ['email','sendEmail','react','emailjs']
+keywords: ['email','sendEmail','react','emailjs', 'react', 'nextjs', contact]
+cover_image: true
+---
+
+## 1. Install EmailJS in your project:
+
+<article>In this article, we'll walk through building a responsive contact form in React that allows users to send messages directly to your email using EmailJS. This component features user-friendly validation, success and error notifications, and a clean, modern design.</article>
+
+```bash
+npm install @emailjs/browser
+```
+
+## 2. Add EmailJS integration to the handleSubmit function 
+
+```jsx 
+const sendEmail = (e) => {
+    e.preventDefault();
+
+    emailjs
+      .send(
+        process.env.NEXT_PUBLIC_YOUR_SERVICE_ID,
+        process.env.NEXT_PUBLIC_YOUR_TEMPLATE_ID,
+        formData,
+        process.env.NEXT_PUBLIC_YOUR_PUBLIC_KEY
+      )
+      .then(
+        () => {
+          console.log('Email sent successfully:', result.text);
+         
+          setFormData({ user_name: "", user_email: "", message: "" }); // Reset form fields
+        },
+        (error) => {
+          console.error("FAILED...", error.text);
+        }
+      );
+  };
+```
+
+
+## 3. Set up your EmailJS account
+
+Go to [EmailJS](https://www.emailjs.com/), create an account, and get the SERVICE_ID, TEMPLATE_ID, and PUBLIC_KEY.
+
+## 4. Add your EmailJS credentials
+
+Replace YOUR_SERVICE_ID, YOUR_TEMPLATE_ID, and PUBLIC_KEY with the actual values from your EmailJS account. 
+
+## 5.# Step-by-Step Guide to Obtain Your Service ID, Template ID, and API Key from EmailJS
+
+1. **Create an EmailJS Account:**
+   - Go to the [EmailJS website](https://www.emailjs.com/) and sign up for a free account if you haven't done so already.
+
+2. **Log In to Your Account:**
+   - Once you have created your account, log in to access the dashboard.
+
+3. **Navigate to the Dashboard:**
+   - After logging in, you will be directed to the dashboard where you can manage your services and templates.
+
+4. **Create a New Service:**
+   - Click on the "Services" tab in the sidebar.
+   - Select "Add Service" or a similar option to create a new email service.
+
+5. **Choose an Email Provider:**
+   - Select your preferred email provider from the list (e.g., Gmail, Outlook, etc.).
+   - Follow the prompts to connect your email account.
+
+6. **Obtain Your Service ID:**
+   - Once your service is created, you will see a Service ID displayed in the service details.
+   - Copy this Service ID for use in your applications.
+
+7. **Create a New Template in EmailJS:**
+   - Go to the EmailJS dashboard, and under the "Email Templates" section, click on "Create New Template..
+   - Copy the below HTML template and paste it into the template editor in EmailJS.
+   - Save the template once you're satisfied with the design.
+
+```html
+ <div class="container">
+    <h1>New message from {{name}}</h1>
+    <p>Hi, you have received a new message from {{name}}:</p>
+    <blockquote>
+        <p>{{message}}</p>
+    </blockquote>
+ </div>
+```
+
+```html
+Subject: New message from {{name}}
+
+Hi, you have received a new message from {{name}}:
+
+{{message}}
+```
+
+9. **Obtain Your Template ID:**
+   - After saving, your Template ID will be displayed in the template details.
+   - Copy this Template ID for later use.
+    - Email Template Example
+
+
+
+ 10. **Get Your API Key:**
+    - Navigate to the "Account" or "Settings" section in the dashboard.
+    - Look for your API Key, which is usually listed prominently.
+    - Copy this API Key, as you will need it to authenticate requests from your application.
+
+ 11. **Test Your Service:**
+    - Optionally, send a test email using the template you created to ensure everything is configured correctly.
+
+## Here it is complete code:
+
+<article>
+  The ContactUs component is a user-friendly contact form built with React, Tailwind and EmailJS, designed to facilitate seamless communication between users and the site owner. Utilizing React's <code>useState</code> and <code>useEffect</code> hooks, this component manages form data, tracks submission success or failure, and provides real-time feedback to users through toast notifications. The form captures the user's name, email, and message, ensuring that all fields are validated before submission. When the form is submitted, the component triggers the <code>sendEmail</code> function, which sends the captured data to the specified email service using EmailJS. The UI is responsive, featuring clear labels, placeholders, and a structured layout that enhances usability. In the event of a successful message delivery, users receive a confirmation notification, while error handling ensures that any issues are communicated effectively. Overall, this component combines modern design with essential functionality, making it an excellent addition to any website.
+</article>
+
+```jsx
+"use client"
+import React, { useEffect, useState } from "react";
+import emailjs from "@emailjs/browser";
+
+export const ContactUs = () => {
+  const [formData, setFormData] = useState({
+    user_name: "",
+    user_email: "",
+    message: "",
+  });
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const sendEmail = (e) => {
+    e.preventDefault();
+
+    emailjs
+      .send(
+        process.env.NEXT_PUBLIC_YOUR_SERVICE_ID,
+        process.env.NEXT_PUBLIC_YOUR_TEMPLATE_ID,
+        formData,
+        process.env.NEXT_PUBLIC_YOUR_PUBLIC_KEY
+      )
+      .then(
+        () => {
+          setSuccess(true);
+          setError(null);
+          setFormData({ user_name: "", user_email: "", message: "" });
+        },
+        (error) => {
+          setError("Failed to send message, please try again later.");
+          setSuccess(false);
+          console.error("FAILED...", error.text);
+        }
+      );
+  };
+
+
+
+  return (
+    <div className="h-screen content-center dark:bg-gray-900">
+      <div className="max-w-3xl mx-auto w-full px-3 sm:px-6 bg-white dark:bg-gray-900">
+        <h2 className="text-3xl font-serif text-center font-semibold text-gray-900 dark:text-gray-100 mb-6">
+          Contact Me
+        </h2>
+
+        {success && (
+          <div className="mb-4 text-green-600">Message sent successfully!</div>
+        )}
+        {error && <div className="mb-4 text-red-600">{error}</div>}
+
+        <form onSubmit={sendEmail} className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between md:gap-5 space-y-4 md:space-y-0">
+            <div className="w-full md:w-1/2">
+              <label
+                htmlFor="user_name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                Name
+              </label>
+              <input
+                type="text"
+                name="user_name"
+                id="user_name"
+                required
+                value={formData.user_name}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-2 bg-slate-100 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-200"
+                placeholder="What should I call you?"
+              />
+            </div>
+            <div className="w-full md:w-1/2">
+              <label
+                htmlFor="user_email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                name="user_email"
+                id="user_email"
+                required
+                value={formData.user_email}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-2 bg-slate-100 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-200"
+                placeholder="Where can I reach you?"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="message"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+            >
+              Message
+            </label>
+            <textarea
+              name="message"
+              id="message"
+              required
+              value={formData.message}
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 bg-slate-100 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-200"
+              rows="5"
+              placeholder="Enter your message..."
+            />
+          </div>
+
+          <div className="text-center">
+            <button
+              type="submit"
+              className="py-2 px-4 text-xs sm:text-sm dark:bg-white dark:text-black dark:hover:bg-gray-900 dark:hover:text-white border-[3px] border-gray-400 rounded-3xl transition hover:bg-gray-900 hover:text-white"
+            >
+              Send Message
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ContactUs;
+
+```
+
+
+
